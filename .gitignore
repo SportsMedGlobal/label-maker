@@ -9,3 +9,4 @@ storage/
 .env
 .env.example
 node_modules/
+.idea/
