@@ -17,7 +17,7 @@ class WebhookController extends Controller
         //
     }
 
-    public function processJiraWebhook(Request $request, $issueKey, $action, $platform)
+    public function processSportsMedJiraWebhook(Request $request, $issueKey, $action, $platform)
     {
         $response = json_decode($request->json(), true);
         $client = new Client();
@@ -51,21 +51,15 @@ class WebhookController extends Controller
                                 ],
                             ]
                         ];
-                        $guzzleClient = new \GuzzleHttp\Client();
-                        $res = $guzzleClient->request('POST', env('SLACK_API'), [
-                            'headers' => [
-                                'Content-type'     => 'application/json'
-                            ],
-                            'body' => json_encode($message)
-                        ]);
+                        $this->sendSlackMessage($message);
                         if ($response['issue']['fields']['issuetype']['name'] === 'Bug') {
-                            $this->attachLabel('add', $platform, $pr['number'], 'Type: Bug');
-                            $this->attachLabel('remove', $platform, $pr['number'], 'Type: Enhancement');
+                            $this->setGithubLabel('add', $platform, $pr['number'], 'Type: Bug');
+                            $this->setGithubLabel('remove', $platform, $pr['number'], 'Type: Enhancement');
                         } else {
-                            $this->attachLabel('add', $platform, $pr['number'], 'Type: Enhancement');
-                            $this->attachLabel('remove', $platform, $pr['number'], 'Type: Bug');
+                            $this->setGithubLabel('add', $platform, $pr['number'], 'Type: Enhancement');
+                            $this->setGithubLabel('remove', $platform, $pr['number'], 'Type: Bug');
                         }
-                        $this->attachLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
                     break;
 
                     case 'code_review_done':
@@ -73,7 +67,7 @@ class WebhookController extends Controller
                             'fallback' => 'A new ticket is ready for testing. <https://sportsmed.atlassian.net/browse/'.$issueKey.'>',
                             'text' => 'A new ticket is ready for testing. <https://sportsmed.atlassian.net/browse/'.$issueKey.'>',
                             'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
-                            'channel' => '#testers',
+                            'channel' => '#testing',
                             "fields" => [
                                 [
                                     'title' => 'Jira Task',
@@ -89,33 +83,27 @@ class WebhookController extends Controller
                                 ],
                             ]
                         ];
-                        $guzzleClient = new \GuzzleHttp\Client();
-                        $res = $guzzleClient->request('POST', env('SLACK_API'), [
-                            'headers' => [
-                                'Content-type'     => 'application/json'
-                            ],
-                            'body' => json_encode($message)
-                        ]);
-                        $this->attachLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
-                        $this->attachLabel('remove', $platform, $pr['number'], 'Status: Code Review Needed');
-                        $this->attachLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
+                        $this->sendSlackMessage($message);
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Code Review Needed');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
                     break;
 
                     case 'code_review_failed':
-                        $this->attachLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
-                        $this->attachLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
                     break;
 
                     case 'testing_in_progress':
-                        $this->attachLabel('add', $platform, $pr['number'], 'Status: In Testing');
-                        $this->attachLabel('remove', $platform, $pr['number'], 'Status: Needs Testing');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: In Testing');
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Needs Testing');
                     break;
 
                     case 'testing_completed':
-                        $this->attachLabel('remove', $platform, $pr['number'], 'Status: Needs Testing');
-                        $this->attachLabel('remove', $platform, $pr['number'], 'Status: In Testing');
-                        $this->attachLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
-                        $this->attachLabel('add', $platform, $pr['number'], 'Status: Completed');
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Needs Testing');
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Completed');
                     break;
 
                     case 'testing_failed':
@@ -139,16 +127,10 @@ class WebhookController extends Controller
                                 ],
                             ]
                         ];
-                        $guzzleClient = new \GuzzleHttp\Client();
-                        $res = $guzzleClient->request('POST', env('SLACK_API'), [
-                            'headers' => [
-                                'Content-type'     => 'application/json'
-                            ],
-                            'body' => json_encode($message)
-                        ]);
-                        $this->attachLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
-                        $this->attachLabel('remove', $platform, $pr['number'], 'Status: In Testing');
-                        $this->attachLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
+                        $this->sendSlackMessage($message);
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
                     break;
                 }
             }
@@ -157,7 +139,7 @@ class WebhookController extends Controller
     }
 
 
-    private function attachLabel($action, $repo, $number, $label)
+    private function setGithubLabel($action, $repo, $number, $label)
     {
         $client = new Client();
         $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
@@ -166,6 +148,17 @@ class WebhookController extends Controller
         } elseif ($action === 'remove') {
             $labels = $client->api('issue')->labels()->remove('SportsMedGlobal', $repo, $number, $label);
         }
+    }
+
+    private function sendSlackMessage($message)
+    {
+        $guzzleClient = new \GuzzleHttp\Client();
+        $res = $guzzleClient->request('POST', env('SLACK_API'), [
+            'headers' => [
+                'Content-type'     => 'application/json'
+            ],
+            'body' => json_encode($message)
+        ]);
     }
 
 

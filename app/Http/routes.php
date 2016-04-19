@@ -15,10 +15,10 @@ $app->get('/', function () use ($app) {
     return $app->version();
 });
 
-$app->post('/webhooks/jira/{issueKey}/{action}/{platform}', [
-    'as' => 'webhook', 'uses' => 'WebhookController@processJiraWebhook'
+$app->post('/webhooks/sportsmed2/jira/{issueKey}/{action}/{platform}', [
+    'as' => 'webhook', 'uses' => 'WebhookController@processSportsMedJiraWebhook'
 ]);
 
-$app->get('/webhooks/jira/{issueKey}/{action}/{platform}', [
-    'as' => 'webhook', 'uses' => 'WebhookController@processJiraWebhook'
+$app->get('/webhooks/sportsmed2/jira/{issueKey}/{action}/{platform}', [
+    'as' => 'webhook', 'uses' => 'WebhookController@processSportsMedJiraWebhook'
 ]);
