@@ -2,3 +2,10 @@
 .env
 Homestead.yaml
 /.vagrant/
+bootstrap/cache/
+storage/
+.env.*.php
+.env.php
+.env
+.env.example
+node_modules/
