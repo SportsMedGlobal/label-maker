@@ -14,3 +14,11 @@
 $app->get('/', function () use ($app) {
     return $app->version();
 });
+
+$app->post('/webhooks/jira/{issueKey}/{action}/{platform}', [
+    'as' => 'webhook', 'uses' => 'WebhookController@processJiraWebhook'
+]);
+
+$app->get('/webhooks/jira/{issueKey}/{action}/{platform}', [
+    'as' => 'webhook', 'uses' => 'WebhookController@processJiraWebhook'
+]);
