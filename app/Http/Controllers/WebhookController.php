@@ -68,7 +68,7 @@ class WebhookController extends Controller
                     'text' => 'Pull request passed code review. <'.$response['issue']['html_url'].'>',
                     'fallback' => 'Pull request passed code review. <'.$response['issue']['html_url'].'>',
                     'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
-                    'channel' => '#development',
+                    'channel' => '#developers',
                     "fields" => [
                         [
                             'title' => 'Jira Task',
@@ -92,7 +92,7 @@ class WebhookController extends Controller
                     'text' => 'Pull request awaiting another code review. <'.$response['issue']['html_url'].'>',
                     'fallback' => 'Pull request awaiting another code review. <'.$response['issue']['html_url'].'>',
                     'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
-                    'channel' => '#development',
+                    'channel' => '#developers',
                     "fields" => [
                         [
                             'title' => 'Jira Task',
