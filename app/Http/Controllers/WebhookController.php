@@ -19,6 +19,12 @@ class WebhookController extends Controller
 
     public function processSportsMedJiraWebhook(Request $request, $issueKey, $action)
     {
+
+        // only support SM and FB tickets for now
+        if (strpos($issueKey, 'SM-') === false || strpos($issueKey, 'FB-') === false) {
+            return;
+        }
+
         $platform = 'platform';
         $response = json_decode($request->json(), true);
         $client = new Client();
