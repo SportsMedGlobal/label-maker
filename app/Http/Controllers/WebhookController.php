@@ -38,6 +38,10 @@ class WebhookController extends Controller
         foreach ($pullRequests as $pr) {
             if (strpos($pr['title'], $issueKey) !== false) {
                 switch ($action) {
+                    case 'dump_info':
+                        echo json_encode($pr);
+                        return;
+                    break;
                     case 'code_review_needed':
                         $message = [
                             'text' => 'A new pull request is awaiting a code review. <'.$pr['html_url'].'>',
