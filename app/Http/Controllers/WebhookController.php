@@ -33,10 +33,10 @@ class WebhookController extends Controller
         $platform = 'platform';
         $client = new Client();
         $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
-        $comments = $client->api('issue'); //->all('SportsMedGlobal', $platform);
+        $comments = $client->api('issue')->comments(); //->all('SportsMedGlobal', $platform);
         $paginator  = new \Github\ResultPager($client);
         $parameters = array('SportsMedGlobal', $platform, $prNumber);
-        $allComments     = $paginator->fetchAll($comments, 'comments', $parameters);
+        $allComments     = $paginator->fetchAll($comments, 'all', $parameters);
 
         foreach ($allComments as $comment)
         {
