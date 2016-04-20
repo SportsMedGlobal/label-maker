@@ -57,7 +57,7 @@ class WebhookController extends Controller
         if (strpos($commentText, 'LGTM') !== false) {
             foreach ($allComments as $comment) {
                 if ($comment['id'] !== $commentId) {
-                    if (strpos($comment['body'], 'LGTM')) {
+                    if (strpos($comment['body'], 'LGTM') !== false) {
                         $count++;
                     }
                 }
