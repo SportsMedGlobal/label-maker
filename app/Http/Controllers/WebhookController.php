@@ -19,11 +19,31 @@ class WebhookController extends Controller
 
     public function processSportsMedGithubWebhook(Request $request, $action)
     {
-        \Log::debug('Github Webhook', ['response' => $request->all()]);
+        $platform = 'platform';
+        \Log::debug('Github Webhook for old platform');
         $response = $request->all();
+        $prNumber = $response['issue']['number'];
         $title = $response['issue']['title'];
+        $commentText = $response['comment']['body'];
+        $commentId = $response['comment']['id'];
         preg_match('/[A-Z]{2}\-\d+/i', $title, $matches);
-        \Log::info('Matches: ', ['regex' => $matches]);
+        $jiraIssue = $matches[0];
+        \Log::info('Matches: '.$jiraIssue);
+
+        $platform = 'platform';
+        $client = new Client();
+        $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
+        $comments = $client->api('issue'); //->all('SportsMedGlobal', $platform);
+        $paginator  = new \Github\ResultPager($client);
+        $parameters = array('SportsMedGlobal', $platform, $prNumber);
+        $allComments     = $paginator->fetchAll($comments, 'all', $parameters);
+
+        foreach ($allComments as $comment)
+        {
+            \Log::debug('comment:', ['comment' => $comment]);
+            exit;
+        }
+
 
 
     }
