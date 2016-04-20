@@ -53,7 +53,7 @@ class WebhookController extends Controller
             ],
             'body' => json_encode($message)
         ]);
-        \Log::info('Jira Response', ['message' => json_encode($message), 'jira' => $res->getBody()]);
+        \Log::info('Jira Response', ['resp' => $res->getStatusCode(), 'message' => json_encode($message), 'jira' => $res->getBody()]);
         if (strpos($commentText, 'LGTM') !== false) {
             foreach ($allComments as $comment) {
                 if ($comment['comment']['id'] !== $commentId) {
