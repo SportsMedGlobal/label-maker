@@ -22,7 +22,7 @@ class WebhookController extends Controller
         \Log::debug('Github Webhook', ['response' => $request->all()]);
         $response = $request->all();
         $title = $response['issue']['title'];
-        preg_match('/[A-Z]{2}\-\d+/gmi', $title, $matches);
+        preg_match('/[A-Z]{2}\-\d+/i', $title, $matches);
         \Log::info('Matches: ', ['regex' => $matches]);
 
 
