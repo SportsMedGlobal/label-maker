@@ -41,7 +41,7 @@ class WebhookController extends Controller
         $count = 0;
         $message = [];
         $guzzleClient = new \GuzzleHttp\Client();
-        $res = $guzzleClient->request('GET', 'http://sportsmed.atlassian.net/rest/api/2/issue/'.$jiraIssue, [
+        $res = $guzzleClient->request('GET', 'http://sportsmed.atlassian.net/rest/api/2/issue/'.$jiraIssue.'/transitions', [
             'headers' => [
                 'Content-type' => 'application/json',
                 'Authorization' => 'Basic '.$token,
