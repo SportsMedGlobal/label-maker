@@ -22,6 +22,7 @@ class WebhookController extends Controller
 
         // only support SM and FB tickets for now
         if (strpos($issueKey, 'SM-') === false || strpos($issueKey, 'FB-') === false) {
+            \Log::info($issueKey . ' webhook discarded');
             return;
         }
 
