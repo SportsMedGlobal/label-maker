@@ -23,10 +23,10 @@ class WebhookController extends Controller
         // only support SM and FB tickets for now
         if (strpos($issueKey, 'SM-') !== false) {
             \Log::info('Running old hooks for '. $issueKey);
-            return $this->processOldPlatform($request, $issueKey, $action);
+            return $this->processOldPlatform($request->json(), $issueKey, $action);
         } elseif (strpos($issueKey, 'FB-') !== false) {
             \Log::info('Running old hooks for '. $issueKey);
-            return $this->processOldPlatform($request, $issueKey, $action);
+            return $this->processOldPlatform($request->json(), $issueKey, $action);
         } else {
             \Log::info('Discarding hook for '.$issueKey);
             return 0;
@@ -37,7 +37,7 @@ class WebhookController extends Controller
     private function processOldPlatform($request, $issueKey, $action)
     {
         $platform = 'platform';
-        $response = json_decode($request->json(), true);
+        $response = json_decode($request, true);
         $client = new Client();
         $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
         $openPullRequests = $client->api('pull_request'); //->all('SportsMedGlobal', $platform);
