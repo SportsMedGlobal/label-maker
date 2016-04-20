@@ -39,8 +39,7 @@ class WebhookController extends Controller
             if (strpos($pr['title'], $issueKey) !== false) {
                 switch ($action) {
                     case 'dump_info':
-                        echo json_encode($pr);
-                        return;
+                        dd($pr);
                     break;
                     case 'code_review_needed':
                         $message = [
