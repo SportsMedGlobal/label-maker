@@ -124,13 +124,13 @@ class WebhookController extends Controller
         // only support SM and FB tickets for now
         if (strpos($issueKey, 'SM-') !== false) {
             \Log::info('Running old hooks for '. $issueKey);
-            return $this->processOldPlatform(json_encode($request->json()), $issueKey, $action);
+            return $this->processOldPlatform($request, $issueKey, $action);
         } elseif (strpos($issueKey, 'FB-') !== false) {
             \Log::info('Running old hooks for '. $issueKey);
-            return $this->processOldPlatform(json_encode($request->json()), $issueKey, $action);
+            return $this->processOldPlatform($request, $issueKey, $action);
         } elseif (strpos($issueKey, 'PP-') !== false) {
             \Log::info('Running new hooks for '. $issueKey);
-            return $this->processNewPlatform(json_encode($request->json()), $issueKey, $action);
+            return $this->processNewPlatform($request, $issueKey, $action);
         } else {
             \Log::info('Discarding hook for '.$issueKey);
             return 0;
@@ -204,7 +204,7 @@ class WebhookController extends Controller
     {
 
         $platform = 'platform';
-        $response = json_decode($request, true);
+        \Log::info('Atlassian Content', ['jira' => $request->all()]);
         $client = new Client();
         $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
         $openPullRequests = $client->api('pull_request'); //->all('SportsMedGlobal', $platform);
