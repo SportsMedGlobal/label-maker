@@ -20,7 +20,7 @@ class WebhookController extends Controller
     public function processSportsMedGithubWebhook(Request $request, $action)
     {
         \Log::debug('Github Webhook', ['response' => $request->json()]);
-        $response = $request->json();
+        $response = json_decode(json_encode($request->json()));
 
         $title = $response['issue']['title'];
         \Log::info($title);
