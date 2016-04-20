@@ -40,7 +40,10 @@ class WebhookController extends Controller
         $token = base64_encode(env('JIRA_USER').':'.env('JIRA_PASS'));
         $count = 0;
         $message = [
-            'transition' => ['id' => '151']
+            'update' => ['comment' => ['add' => 'Passed code review']],
+            'transition' => [
+                'id' => '151'
+            ]
         ];
         $guzzleClient = new \GuzzleHttp\Client();
         $res = $guzzleClient->request('POST', 'http://sportsmed.atlassian.net/rest/api/2/issue/'.$jiraIssue.'/transitions', [
