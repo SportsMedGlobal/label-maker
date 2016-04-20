@@ -22,7 +22,7 @@ class WebhookController extends Controller
         \Log::debug('Github Webhook', ['response' => $request->json()]);
         $response = json_decode(json_encode($request->json()), true);
 
-        $title = $response['issue']['title'];
+        $title = $response['response']['issue']['title'];
         \Log::info($title);
 
     }
