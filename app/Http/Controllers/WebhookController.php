@@ -27,10 +27,75 @@ class WebhookController extends Controller
         } elseif (strpos($issueKey, 'FB-') !== false) {
             \Log::info('Running old hooks for '. $issueKey);
             return $this->processOldPlatform(json_encode($request->json()), $issueKey, $action);
+        } elseif (strpos($issueKey, 'PP-') !== false) {
+            \Log::info('Running new hooks for '. $issueKey);
+            return $this->processNewPlatform(json_encode($request->json()), $issueKey, $action);
         } else {
             \Log::info('Discarding hook for '.$issueKey);
             return 0;
         }
+    }
+
+    private function processNewPlatform($request, $issueKey, $action)
+    {
+        $repos = ['platform3-frontend', 'platform3-backend'];
+        $response = json_decode($request, true);
+        $pullRequests = [];
+        foreach ($repos as $repo) {
+            $client = new Client();
+            $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
+            $openPullRequests = $client->api('pull_request'); //->all('SportsMedGlobal', $platform);
+            $paginator  = new \Github\ResultPager($client);
+            $parameters = array('SportsMedGlobal', $repo);
+            $pullRequests[$repo] = $paginator->fetchAll($openPullRequests, 'all', $parameters);
+        }
+        $found = false;
+        foreach ($pullRequests['platform3-backend'] as $pullRequest) {
+            if (strpos($pullRequest['title'], $issueKey) !== false) {
+                $found = true;
+                $pr = $pullRequest;
+                break;
+            }
+        }
+
+        if (!$found) {
+            foreach ($pullRequests['platform3-frontend'] as $pullRequest) {
+                if (strpos($pullRequest['title'], $issueKey) !== false) {
+                    $found = true;
+                    $pr = $pullRequest;
+                    break;
+                }
+            }
+        }
+
+        if ($found) {
+            switch ($action) {
+                case 'code_review_needed':
+                    $message = [
+                        'text' => 'A new pull request is awaiting a code review. <'.$pr['html_url'].'>',
+                        'fallback' => 'A new pull request is awaiting a code review. <'.$pr['html_url'].'>',
+                        'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
+                        'channel' => '#phoenix-development',
+                        "fields" => [
+                            [
+                                'title' => 'Jira Task',
+                                'value' => '<https://sportsmed.atlassian.net/browse/'.$issueKey.'|'.$issueKey.'>'
+                            ],
+                            [
+                                'title' => 'Author',
+                                'value' => $pr['user']['login']
+                            ],
+                            [
+                                'title' => 'Pull Request',
+                                'value' => '<'.$pr['html_url'].'|'.$pr['number'].'>'
+                            ],
+                        ]
+                    ];
+                    $this->sendSlackMessage($message);
+                break;
+            }
+        }
+
     }
 
 
@@ -155,6 +220,7 @@ class WebhookController extends Controller
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
                         break;
                 }
+                break;
             }
         }
         return 1;
