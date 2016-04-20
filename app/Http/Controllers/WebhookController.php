@@ -37,13 +37,37 @@ class WebhookController extends Controller
         $paginator  = new \Github\ResultPager($client);
         $parameters = array('SportsMedGlobal', $platform, $prNumber);
         $allComments     = $paginator->fetchAll($comments, 'all', $parameters);
+        $token = base64_encode(env('JIRA_USER').':'.env('JIRA_PASS'));
+        $count = 0;
+        $message = [];
+        $guzzleClient = new \GuzzleHttp\Client();
+        $res = $guzzleClient->request('GET', 'http://sportsmed.atlassian.net/rest/api/2/issue/'.$jiraIssue, [
+            'headers' => [
+                'Content-type' => 'application/json',
+                'Authorization' => 'Basic '.$token,
+            ],
+            //'body' => json_encode($message)
+        ]);
+        \Log::info('Jira Response', ['jira' => $res->getBody()]);
+        if (strpos($commentText, 'LGTM') !== false) {
+            foreach ($allComments as $comment) {
+                if ($comment['comment']['id'] !== $commentId) {
+                    if (strpos($comment['comment']['body'], 'LGTM')) {
+                        $count++;
+                    }
+                }
+            }
+            if ($count === 1) {
+                // Do transition
 
-        foreach ($allComments as $comment)
-        {
-            \Log::debug('comment:', ['comment' => $comment]);
-            exit;
+
+            } elseif ($count !== 0) {
+                // More code reviews needed
+
+            } else {
+                // Check manually
+            }
         }
-
 
 
     }
