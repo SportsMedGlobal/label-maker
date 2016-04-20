@@ -84,6 +84,7 @@ class WebhookController extends Controller
                         }
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
                         break;
 
                     case 'code_review_done':
