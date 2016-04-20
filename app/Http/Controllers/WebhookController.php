@@ -17,6 +17,11 @@ class WebhookController extends Controller
         //
     }
 
+    public function processSportsMedGithubWebhook(Request $request, $action)
+    {
+        \Log::debug('Github Webhook', ['response' => $request->json(), 'test' => json_decode($request->json())]);
+    }
+
     public function processSportsMedJiraWebhook(Request $request, $issueKey, $action)
     {
 
@@ -179,6 +184,7 @@ class WebhookController extends Controller
                     case 'code_review_failed':
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
+                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket failed code review on: '. date('r'). ' | This was an automated message');
                         break;
 
                     case 'testing_in_progress':
@@ -218,6 +224,7 @@ class WebhookController extends Controller
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
+                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket failed testing on: '. date('r'). ' | This was an automated message');
                         break;
                 }
                 break;
@@ -235,6 +242,13 @@ class WebhookController extends Controller
         } elseif ($action === 'remove') {
             $labels = $client->api('issue')->labels()->remove('SportsMedGlobal', $repo, $number, $label);
         }
+    }
+
+    private function createGithubComment($repo, $number, $comment)
+    {
+        $client = new Client();
+        $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
+        $client->api('issue')->comments()->create('SportsMedGlobal', $repo, $number, ['body' => $comment]);
     }
 
     private function sendSlackMessage($message)

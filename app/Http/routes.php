@@ -16,9 +16,20 @@ $app->get('/', function () use ($app) {
 });
 
 $app->post('/webhooks/sportsmed2/jira/{issueKey}/{action}', [
-    'as' => 'webhook', 'uses' => 'WebhookController@processSportsMedJiraWebhook'
+    'as' => 'webhook.jira', 'uses' => 'WebhookController@processSportsMedJiraWebhook'
 ]);
 
 $app->get('/webhooks/sportsmed2/jira/{issueKey}/{action}', [
-    'as' => 'webhook', 'uses' => 'WebhookController@processSportsMedJiraWebhook'
+    'as' => 'webhook.jira', 'uses' => 'WebhookController@processSportsMedJiraWebhook'
 ]);
+
+
+$app->post('/webhooks/sportsmed2/github/{action}', [
+    'as' => 'webhook.github', 'uses' => 'WebhookController@processSportsMedGithubWebhook'
+]);
+
+$app->get('/webhooks/sportsmed2/github/{action}', [
+    'as' => 'webhook.github', 'uses' => 'WebhookController@processSportsMedGithubWebhook'
+]);
+
+
