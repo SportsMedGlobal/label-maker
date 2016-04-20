@@ -39,14 +39,16 @@ class WebhookController extends Controller
         $allComments     = $paginator->fetchAll($comments, 'all', $parameters);
         $token = base64_encode(env('JIRA_USER').':'.env('JIRA_PASS'));
         $count = 0;
-        $message = [];
+        $message = [
+            'transition' => 151
+        ];
         $guzzleClient = new \GuzzleHttp\Client();
-        $res = $guzzleClient->request('GET', 'http://sportsmed.atlassian.net/rest/api/2/issue/'.$jiraIssue.'/transitions', [
+        $res = $guzzleClient->request('POST', 'http://sportsmed.atlassian.net/rest/api/2/issue/'.$jiraIssue.'/transitions', [
             'headers' => [
                 'Content-type' => 'application/json',
                 'Authorization' => 'Basic '.$token,
             ],
-            //'body' => json_encode($message)
+            'body' => json_encode($message)
         ]);
         \Log::info('Jira Response', ['jira' => $res->getBody()]);
         if (strpos($commentText, 'LGTM') !== false) {
