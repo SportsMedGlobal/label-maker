@@ -36,7 +36,7 @@ class WebhookController extends Controller
         $comments = $client->api('issue'); //->all('SportsMedGlobal', $platform);
         $paginator  = new \Github\ResultPager($client);
         $parameters = array('SportsMedGlobal', $platform, $prNumber);
-        $allComments     = $paginator->fetchAll($comments, 'all', $parameters);
+        $allComments     = $paginator->fetchAll($comments, 'comments', $parameters);
 
         foreach ($allComments as $comment)
         {
