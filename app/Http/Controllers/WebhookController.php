@@ -21,11 +21,21 @@ class WebhookController extends Controller
     {
 
         // only support SM and FB tickets for now
-        if (strpos($issueKey, 'SM-') === false || strpos($issueKey, 'FB-') === false) {
-            \Log::info($issueKey . ' webhook discarded');
-            return;
+        if (strpos($issueKey, 'SM-') !== false) {
+            \Log::info('Running old hooks for '. $issueKey);
+            return $this->processOldPlatform($request, $issueKey, $action);
+        } elseif (strpos($issueKey, 'FB-') !== false) {
+            \Log::info('Running old hooks for '. $issueKey);
+            return $this->processOldPlatform($request, $issueKey, $action);
+        } else {
+            \Log::info('Discarding hook for '.$issueKey);
+            return 0;
         }
+    }
 
+
+    private function processOldPlatform($request, $issueKey, $action)
+    {
         $platform = 'platform';
         $response = json_decode($request->json(), true);
         $client = new Client();
@@ -39,8 +49,9 @@ class WebhookController extends Controller
             if (strpos($pr['title'], $issueKey) !== false) {
                 switch ($action) {
                     case 'dump_info':
-                        dd($pr);
-                    break;
+                        echo json_encode($pr);
+                        return;
+                        break;
                     case 'code_review_needed':
                         $message = [
                             'text' => 'A new pull request is awaiting a code review. <'.$pr['html_url'].'>',
@@ -72,7 +83,7 @@ class WebhookController extends Controller
                         }
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
-                    break;
+                        break;
 
                     case 'code_review_done':
                         $message = [
@@ -99,24 +110,24 @@ class WebhookController extends Controller
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Code Review Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
-                    break;
+                        break;
 
                     case 'code_review_failed':
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
-                    break;
+                        break;
 
                     case 'testing_in_progress':
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Needs Testing');
-                    break;
+                        break;
 
                     case 'testing_completed':
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Completed');
-                    break;
+                        break;
 
                     case 'testing_failed':
                         $message = [
@@ -143,13 +154,12 @@ class WebhookController extends Controller
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
-                    break;
+                        break;
                 }
             }
         }
-        return;
+        return 1;
     }
-
 
     private function setGithubLabel($action, $repo, $number, $label)
     {
