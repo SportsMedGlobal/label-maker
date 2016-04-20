@@ -86,7 +86,7 @@ class WebhookController extends Controller
                 ];
                 $this->sendSlackMessage($message);
 
-            } elseif ($count !== 0) {
+            } elseif ($count === 0) {
                 // More code reviews needed
                 $message = [
                     'text' => 'Pull request awaiting another code review. <'.$response['issue']['html_url'].'>',
