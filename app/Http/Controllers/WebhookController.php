@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Github\Client;
 use Illuminate\Http\Request;
 
@@ -274,13 +275,13 @@ class WebhookController extends Controller
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Code Review Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
-                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket passed code review on: '. date('r'). ' | This was an automated message');
+                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket passed code review on: '. \Carbon::now() . ' | This was an automated message');
                         break;
 
                     case 'code_review_failed':
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
-                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket failed code review on: '. date('r'). ' | This was an automated message');
+                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket failed code review on: '. \Carbon::now() . ' | This was an automated message');
                         break;
 
                     case 'testing_in_progress':
@@ -293,7 +294,7 @@ class WebhookController extends Controller
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Completed');
-                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket passed testing on: '. date('r'). ' | This was an automated message');
+                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket passed testing on: '. \Carbon::now() . ' | This was an automated message');
                         break;
 
                     case 'testing_failed':
@@ -321,7 +322,7 @@ class WebhookController extends Controller
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
-                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket failed testing on: '. date('r'). ' | This was an automated message');
+                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket failed testing on: '. \Carbon::now() . ' | This was an automated message');
                         break;
                 }
                 break;
