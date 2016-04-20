@@ -56,8 +56,8 @@ class WebhookController extends Controller
         \Log::info('Jira Response', ['resp' => $res->getStatusCode(), 'message' => json_encode($message), 'jira' => $res->getBody()]);*/
         if (strpos($commentText, 'LGTM') !== false) {
             foreach ($allComments as $comment) {
-                if ($comment['comment']['id'] !== $commentId) {
-                    if (strpos($comment['comment']['body'], 'LGTM')) {
+                if ($comment['id'] !== $commentId) {
+                    if (strpos($comment['body'], 'LGTM')) {
                         $count++;
                     }
                 }
