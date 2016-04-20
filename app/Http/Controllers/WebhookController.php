@@ -75,13 +75,6 @@ class WebhookController extends Controller
                             ]
                         ];
                         $this->sendSlackMessage($message);
-                        if ($response['issue']['fields']['issuetype']['name'] === 'Bug') {
-                            $this->setGithubLabel('add', $platform, $pr['number'], 'Type: Bug');
-                            $this->setGithubLabel('remove', $platform, $pr['number'], 'Type: Enhancement');
-                        } else {
-                            $this->setGithubLabel('add', $platform, $pr['number'], 'Type: Enhancement');
-                            $this->setGithubLabel('remove', $platform, $pr['number'], 'Type: Bug');
-                        }
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
