@@ -40,7 +40,7 @@ class WebhookController extends Controller
         $token = base64_encode(env('JIRA_USER').':'.env('JIRA_PASS'));
         $count = 0;
         $message = [
-            'update' => ['comment' => ['add' => 'Passed code review']],
+            'update' => ['comment' => ['add' => ['body' => 'Passed code review']]],
             'transition' => [
                 'id' => '151'
             ]
