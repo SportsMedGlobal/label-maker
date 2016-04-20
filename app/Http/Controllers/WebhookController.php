@@ -17,8 +17,9 @@ class WebhookController extends Controller
         //
     }
 
-    public function processSportsMedJiraWebhook(Request $request, $issueKey, $action, $platform)
+    public function processSportsMedJiraWebhook(Request $request, $issueKey, $action)
     {
+        $platform = 'platform';
         $response = json_decode($request->json(), true);
         $client = new Client();
         $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
@@ -60,6 +61,7 @@ class WebhookController extends Controller
                             $this->setGithubLabel('remove', $platform, $pr['number'], 'Type: Bug');
                         }
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
                     break;
 
                     case 'code_review_done':
