@@ -28,7 +28,7 @@ class WebhookController extends Controller
         $commentId = $response['comment']['id'];
         preg_match('/[A-Z]{2}\-\d+/i', $title, $matches);
         $jiraIssue = $matches[0];
-        \Log::info('Matches: '.$jiraIssue);
+
 
         $platform = 'platform';
         $client = new Client();
@@ -39,7 +39,7 @@ class WebhookController extends Controller
         $allComments     = $paginator->fetchAll($comments, 'all', $parameters);
         $token = base64_encode(env('JIRA_USER').':'.env('JIRA_PASS'));
         $count = 0;
-        $message = [
+        /*$message = [
             'update' => ['comment' => ['add' => ['body' => 'Passed code review']]],
             'transition' => [
                 'id' => '151'
@@ -53,7 +53,7 @@ class WebhookController extends Controller
             ],
             'body' => json_encode($message)
         ]);
-        \Log::info('Jira Response', ['resp' => $res->getStatusCode(), 'message' => json_encode($message), 'jira' => $res->getBody()]);
+        \Log::info('Jira Response', ['resp' => $res->getStatusCode(), 'message' => json_encode($message), 'jira' => $res->getBody()]);*/
         if (strpos($commentText, 'LGTM') !== false) {
             foreach ($allComments as $comment) {
                 if ($comment['comment']['id'] !== $commentId) {
@@ -64,11 +64,51 @@ class WebhookController extends Controller
             }
             if ($count === 1) {
                 // Do transition
-
+                $message = [
+                    'text' => 'Pull request passed code review. <'.$response['issue']['html_url'].'>',
+                    'fallback' => 'Pull request passed code review. <'.$response['issue']['html_url'].'>',
+                    'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
+                    'channel' => '#development',
+                    "fields" => [
+                        [
+                            'title' => 'Jira Task',
+                            'value' => '<https://sportsmed.atlassian.net/browse/'.$jiraIssue.'|'.$jiraIssue.'>'
+                        ],
+                        [
+                            'title' => 'Author',
+                            'value' => $response['issue']['user']['login']
+                        ],
+                        [
+                            'title' => 'Pull Request',
+                            'value' => '<'.$response['issue']['html_url'].'|'.$prNumber.'>'
+                        ],
+                    ]
+                ];
+                $this->sendSlackMessage($message);
 
             } elseif ($count !== 0) {
                 // More code reviews needed
-
+                $message = [
+                    'text' => 'Pull request awaiting another code review. <'.$response['issue']['html_url'].'>',
+                    'fallback' => 'Pull request awaiting another code review. <'.$response['issue']['html_url'].'>',
+                    'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
+                    'channel' => '#development',
+                    "fields" => [
+                        [
+                            'title' => 'Jira Task',
+                            'value' => '<https://sportsmed.atlassian.net/browse/'.$jiraIssue.'|'.$jiraIssue.'>'
+                        ],
+                        [
+                            'title' => 'Author',
+                            'value' => $response['issue']['user']['login']
+                        ],
+                        [
+                            'title' => 'Pull Request',
+                            'value' => '<'.$response['issue']['html_url'].'|'.$prNumber.'>'
+                        ],
+                    ]
+                ];
+                $this->sendSlackMessage($message);
             } else {
                 // Check manually
             }
