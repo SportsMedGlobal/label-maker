@@ -239,6 +239,10 @@ class WebhookController extends Controller
                                     'value' => $pr['user']['login']
                                 ],
                                 [
+                                    'title' => 'Task Title',
+                                    'value' => $pr['title']
+                                ],
+                                [
                                     'title' => 'Pull Request',
                                     'value' => '<'.$pr['html_url'].'|'.$pr['number'].'>'
                                 ],
@@ -266,9 +270,13 @@ class WebhookController extends Controller
                                     'value' => $pr['user']['login']
                                 ],
                                 [
+                                    'title' => 'Task Title',
+                                    'value' => $pr['title']
+                                ],
+                                [
                                     'title' => 'Pull Request',
                                     'value' => '<'.$pr['html_url'].'|'.$pr['number'].'>'
-                                ],
+                                ]
                             ]
                         ];
                         $this->sendSlackMessage($message);
@@ -311,6 +319,10 @@ class WebhookController extends Controller
                                 [
                                     'title' => 'Author',
                                     'value' => $pr['user']['login']
+                                ],
+                                [
+                                    'title' => 'Task Title',
+                                    'value' => $pr['title']
                                 ],
                                 [
                                     'title' => 'Pull Request',
