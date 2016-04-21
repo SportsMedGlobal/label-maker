@@ -123,16 +123,16 @@ class WebhookController extends Controller
 
         // only support SM and FB tickets for now
         if (strpos($issueKey, 'SM-') !== false) {
-            \Log::info('Running old hooks for '. $issueKey);
+            \Log::info('Running old '.$action.' hook for '. $issueKey);
             return $this->processOldPlatform($request, $issueKey, $action);
         } elseif (strpos($issueKey, 'FB-') !== false) {
-            \Log::info('Running old hooks for '. $issueKey);
+            \Log::info('Running old '.$action.' hook for '. $issueKey);
             return $this->processOldPlatform($request, $issueKey, $action);
         } elseif (strpos($issueKey, 'PP-') !== false) {
-            \Log::info('Running new hooks for '. $issueKey);
+            \Log::info('Running new '.$action.' hook for '. $issueKey);
             return $this->processNewPlatform($request, $issueKey, $action);
         } else {
-            \Log::info('Discarding hook for '.$issueKey);
+            \Log::info('Discarding '.$action.' hook for '.$issueKey);
             return 0;
         }
     }
