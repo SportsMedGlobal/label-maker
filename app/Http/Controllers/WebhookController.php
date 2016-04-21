@@ -262,6 +262,7 @@ class WebhookController extends Controller
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Work In Progress');
                         break;
 
                     case 'code_review_done':
@@ -293,13 +294,14 @@ class WebhookController extends Controller
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Code Review Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
-                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket passed code review by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . ' | This was an automated message');
+                        $this->createGithubComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed code review by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
                         break;
 
                     case 'code_review_failed':
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
-                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket failed code review by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . ' | This was an automated message');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Work In Progress');
+                        $this->createGithubComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed code review by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
                         break;
 
                     case 'testing_in_progress':
@@ -311,8 +313,9 @@ class WebhookController extends Controller
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
+                        $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Work In Progress');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Completed');
-                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket passed testing by:'.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . ' | This was an automated message');
+                        $this->createGithubComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed testing by:'.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
                         break;
 
                     case 'testing_failed':
@@ -341,10 +344,12 @@ class WebhookController extends Controller
                             ]
                         ];
                         $this->sendSlackMessage($message);
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
+                        $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Work In Progress');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
-                        $this->createGithubComment($platform, $pr['number'], '@'.$pr['user']['login']. ' ticket failed testing by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . ' | This was an automated message');
+                        $this->createGithubComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed testing by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
                         break;
                 }
                 break;
