@@ -214,7 +214,8 @@ class WebhookController extends Controller
     {
 
         $platform = 'platform';
-        \Log::info('Atlassian Content', ['jira' => $request->all()]);
+        $jiraInfo = $request->all();
+        \Log::info('Atlassian Content', ['jira' => $jiraInfo['user']['name']]);
         $client = new Client();
         $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
         $openPullRequests = $client->api('pull_request'); //->all('SportsMedGlobal', $platform);
