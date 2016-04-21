@@ -139,7 +139,7 @@ class WebhookController extends Controller
 
     private function processNewPlatform($request, $issueKey, $action)
     {
-        $repos = ['platform3-frontend', 'platform3-backend'];
+        $repos = ['platform3-frontend', 'platform3-backend', 'dragoman'];
         $response = json_decode($request, true);
         $pullRequests = [];
         foreach ($repos as $repo) {
@@ -161,6 +161,16 @@ class WebhookController extends Controller
 
         if (!$found) {
             foreach ($pullRequests['platform3-frontend'] as $pullRequest) {
+                if (strpos($pullRequest['title'], $issueKey) !== false) {
+                    $found = true;
+                    $pr = $pullRequest;
+                    break;
+                }
+            }
+        }
+
+        if (!$found) {
+            foreach ($pullRequests['dragoman'] as $pullRequest) {
                 if (strpos($pullRequest['title'], $issueKey) !== false) {
                     $found = true;
                     $pr = $pullRequest;
