@@ -252,7 +252,6 @@ class WebhookController extends Controller
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
-                        $this->setGithubMilestone($platform, 3152, 28);
                         break;
 
                     case 'code_review_done':
@@ -353,13 +352,6 @@ class WebhookController extends Controller
         } elseif ($action === 'remove') {
             $labels = $client->api('issue')->labels()->remove('SportsMedGlobal', $repo, $number, $label);
         }
-    }
-
-    private function setGithubMilestone($repo, $number, $version)
-    {
-        $client = new Client();
-        $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
-        $labels = $client->api('issue')->update('SportsMedGlobal', $repo, $number, ['milestone' => 'R2016_05']);
     }
 
     private function createGithubComment($repo, $number, $comment)
