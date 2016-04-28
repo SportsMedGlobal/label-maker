@@ -12,7 +12,7 @@ class CreateTasksTable extends Migration {
 			$table->timestamps();
 			$table->string('key', 50);
 			$table->integer('assignee_id');
-			$table->enum('state', array('needs_cr', 'needs_testing', 'changes_needed', 'completed'));
+			$table->enum('state', array('development','needs_cr', 'needs_testing', 'in_testing', 'changes_needed', 'completed'));
 		});
 	}
 

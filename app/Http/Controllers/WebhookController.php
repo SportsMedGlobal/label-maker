@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Actions;
+use App\Models\Tasks;
+use App\Models\Users;
 use Carbon\Carbon;
 use Github\Client;
 use Illuminate\Http\Request;
@@ -18,112 +21,12 @@ class WebhookController extends Controller
         //
     }
 
-    public function processSportsMedGithubWebhook(Request $request, $action)
-    {
-        $platform = 'platform';
-        \Log::debug('Github Webhook for old platform');
-        $response = $request->all();
-        $prNumber = $response['issue']['number'];
-        $title = $response['issue']['title'];
-        $commentText = $response['comment']['body'];
-        $commentId = $response['comment']['id'];
-        preg_match('/[A-Z]{2}\-\d+/i', $title, $matches);
-        $jiraIssue = $matches[0];
-
-
-        $platform = 'platform';
-        $client = new Client();
-        $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
-        $comments = $client->api('issue')->comments(); //->all('SportsMedGlobal', $platform);
-        $paginator  = new \Github\ResultPager($client);
-        $parameters = array('SportsMedGlobal', $platform, $prNumber);
-        $allComments     = $paginator->fetchAll($comments, 'all', $parameters);
-        $token = base64_encode(env('JIRA_USER').':'.env('JIRA_PASS'));
-        $count = 0;
-        /*$message = [
-            'update' => ['comment' => ['add' => ['body' => 'Passed code review']]],
-            'transition' => [
-                'id' => '151'
-            ]
-        ];
-        $guzzleClient = new \GuzzleHttp\Client();
-        $res = $guzzleClient->request('PUT', 'http://sportsmed.atlassian.net/rest/api/2/issue/'.$jiraIssue.'/transitions', [
-            'headers' => [
-                'Content-type' => 'application/json',
-                'Authorization' => 'Basic '.$token,
-            ],
-            'body' => json_encode($message)
-        ]);
-        \Log::info('Jira Response', ['resp' => $res->getStatusCode(), 'message' => json_encode($message), 'jira' => $res->getBody()]);*/
-        if (strpos($commentText, 'LGTM') !== false) {
-            foreach ($allComments as $comment) {
-                if ($comment['id'] !== $commentId) {
-                    if (strpos($comment['body'], 'LGTM') !== false) {
-                        $count++;
-                    }
-                }
-            }
-            if ($count === 1) {
-                // Do transition
-                $message = [
-                    'text' => 'Pull request passed code review. <'.$response['issue']['html_url'].'>',
-                    'fallback' => 'Pull request passed code review. <'.$response['issue']['html_url'].'>',
-                    'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
-                    'channel' => '#developers',
-                    "fields" => [
-                        [
-                            'title' => 'Jira Task',
-                            'value' => '<https://sportsmed.atlassian.net/browse/'.$jiraIssue.'|'.$jiraIssue.'>'
-                        ],
-                        [
-                            'title' => 'Author',
-                            'value' => $response['issue']['user']['login']
-                        ],
-                        [
-                            'title' => 'Pull Request',
-                            'value' => '<'.$response['issue']['html_url'].'|'.$prNumber.'>'
-                        ],
-                    ]
-                ];
-                $this->sendSlackMessage($message);
-
-            } elseif ($count === 0) {
-                // More code reviews needed
-                $message = [
-                    'text' => 'Pull request awaiting another code review. <'.$response['issue']['html_url'].'>',
-                    'fallback' => 'Pull request awaiting another code review. <'.$response['issue']['html_url'].'>',
-                    'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
-                    'channel' => '#developers',
-                    "fields" => [
-                        [
-                            'title' => 'Jira Task',
-                            'value' => '<https://sportsmed.atlassian.net/browse/'.$jiraIssue.'|'.$jiraIssue.'>'
-                        ],
-                        [
-                            'title' => 'Author',
-                            'value' => $response['issue']['user']['login']
-                        ],
-                        [
-                            'title' => 'Pull Request',
-                            'value' => '<'.$response['issue']['html_url'].'|'.$prNumber.'>'
-                        ],
-                    ]
-                ];
-                $this->sendSlackMessage($message);
-            } else {
-                // Check manually
-            }
-        }
-
-
-    }
-
     public function processSportsMedJiraWebhook(Request $request, $issueKey, $action)
     {
 
         // only support SM and FB tickets for now
         if (strpos($issueKey, 'SM-') !== false) {
-            \Log::info('Running old '.$action.' hook for '. $issueKey, ['jira' => $request->all()]);
+            \Log::info('Running old '.$action.' hook for '. $issueKey);
             return $this->processOldPlatform($request, $issueKey, $action);
         } elseif (strpos($issueKey, 'FB-') !== false) {
             \Log::info('Running old '.$action.' hook for '. $issueKey);
@@ -221,13 +124,33 @@ class WebhookController extends Controller
         $paginator  = new \Github\ResultPager($client);
         $parameters = array('SportsMedGlobal', $platform);
         $pullRequests     = $paginator->fetchAll($openPullRequests, 'all', $parameters);
+        $user = $this->checkUser($request['issue']['fields']['assignee']['name'], $request['issue']['fields']['assignee']['displayName']);
+        $task = $this->checkTask($issueKey);
 
         foreach ($pullRequests as $pr) {
             if (strpos($pr['title'], $issueKey) !== false) {
                 switch ($action) {
                     case 'create_task':
+                        if ($request['issue']['fields']['priority']['name'] == 'Critical') {
+                            // TODO Send Critical notice
+                        }
+
+                        $task->assignee_id = $user->id;
+                        $task->state = 'development';
+                        $task->save();
+
+                        $action = new Actions;
+                        $action->user_id = $user->id;
+                        $action->task_id = $task->id;
+                        $action->action = 'created_task';
+                        $action->save();
+
                     break;
                     case 'code_review_needed':
+                        $task->assignee_id = $user->id;
+                        $task->state = 'needs_cr';
+                        $task->save();
+
                         $message = [
                             'text' => 'A new pull request is awaiting a code review. <'.$pr['html_url'].'>',
                             'fallback' => 'A new pull request is awaiting a code review. <'.$pr['html_url'].'>',
@@ -260,6 +183,15 @@ class WebhookController extends Controller
                         break;
 
                     case 'code_review_done':
+                        $task->state = 'needs_testing';
+                        $task->save();
+
+                        $action = new Actions;
+                        $action->user_id = $user->id;
+                        $action->task_id = $task->id;
+                        $action->action = 'cr_passed';
+                        $action->save();
+
                         $message = [
                             'fallback' => 'A new ticket is ready for testing. <https://sportsmed.atlassian.net/browse/'.$issueKey.'>',
                             'text' => 'A new ticket is ready for testing. <https://sportsmed.atlassian.net/browse/'.$issueKey.'>',
@@ -292,6 +224,15 @@ class WebhookController extends Controller
                         break;
 
                     case 'code_review_failed':
+                        $task->state = 'development';
+                        $task->save();
+
+                        $action = new Actions;
+                        $action->user_id = $user->id;
+                        $action->task_id = $task->id;
+                        $action->action = 'cr_failed';
+                        $action->save();
+                        
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Revision Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Code Review Needed');
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: Work In Progress');
@@ -299,11 +240,27 @@ class WebhookController extends Controller
                         break;
 
                     case 'testing_in_progress':
+                        $task->state = 'in_testing';
+                        $task->save();
+
+                        $action = new Actions;
+                        $action->user_id = $user->id;
+                        $action->task_id = $task->id;
+                        $action->action = 'started_testing';
+                        $action->save();
                         $this->setGithubLabel('add', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Needs Testing');
                         break;
 
                     case 'testing_completed':
+                        $task->state = 'completed';
+                        $task->save();
+
+                        $action = new Actions;
+                        $action->user_id = $user->id;
+                        $action->task_id = $task->id;
+                        $action->action = 'testing_passed';
+                        $action->save();
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Needs Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: In Testing');
                         $this->setGithubLabel('remove', $platform, $pr['number'], 'Status: Revision Needed');
@@ -313,6 +270,14 @@ class WebhookController extends Controller
                         break;
 
                     case 'testing_failed':
+                        $task->state = 'development';
+                        $task->save();
+
+                        $action = new Actions;
+                        $action->user_id = $user->id;
+                        $action->task_id = $task->id;
+                        $action->action = 'testing_failed';
+                        $action->save();
                         $message = [
                             'text' => 'The following pull request has failed testing <'.$pr['html_url'].'>',
                             'fallback' => 'The following pull request has failed testing <'.$pr['html_url'].'>',
@@ -379,6 +344,29 @@ class WebhookController extends Controller
             ],
             'body' => json_encode($message)
         ]);
+    }
+
+    private function checkTask($issueKey)
+    {
+        $task = Tasks::where('key', $issueKey)->first();
+        if (!$task) {
+            $task = new Tasks;
+            $task->key = $issueKey;
+            $task->save();
+        }
+        return $task;
+    }
+
+    private function checkUser($username, $fullName)
+    {
+        $user = Users::where('username', $username)->first();
+        if (!$user) {
+            $user = new Users;
+            $user->full_name = $fullName;
+            $user->username = $username;
+            $user->save();
+        }
+        return $user;
     }
 
 

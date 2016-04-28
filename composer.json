@@ -10,7 +10,8 @@
         "vlucas/phpdotenv": "~2.2",
         "guzzlehttp/guzzle": "^6.2",
         "knplabs/github-api": "~1.4",
-        "cleentfaar/slack": "~0.14"
+        "cleentfaar/slack": "~0.14",
+        "barryvdh/laravel-ide-helper": "^2.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
