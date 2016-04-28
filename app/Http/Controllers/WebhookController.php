@@ -123,7 +123,7 @@ class WebhookController extends Controller
 
         // only support SM and FB tickets for now
         if (strpos($issueKey, 'SM-') !== false) {
-            \Log::info('Running old '.$action.' hook for '. $issueKey);
+            \Log::info('Running old '.$action.' hook for '. $issueKey, ['jira' => $request->all()]);
             return $this->processOldPlatform($request, $issueKey, $action);
         } elseif (strpos($issueKey, 'FB-') !== false) {
             \Log::info('Running old '.$action.' hook for '. $issueKey);
@@ -225,14 +225,8 @@ class WebhookController extends Controller
         foreach ($pullRequests as $pr) {
             if (strpos($pr['title'], $issueKey) !== false) {
                 switch ($action) {
-                    case 'dump_gh':
-                        echo json_encode($pr);
-                        return;
-                        break;
-                    case 'dump_jira':
-                        echo json_encode($response);
-                        return;
-                        break;
+                    case 'create_task':
+                    break;
                     case 'code_review_needed':
                         $message = [
                             'text' => 'A new pull request is awaiting a code review. <'.$pr['html_url'].'>',
