@@ -25,6 +25,7 @@ class Tasks extends Model {
                 tasks.id,
                 tasks.key,
                 tasks.state,
+                tasks.title,
                 tasks.completed_at,
                 tasks.created_at,
                 tasks.updated_at,

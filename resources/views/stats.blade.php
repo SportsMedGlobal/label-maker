@@ -59,7 +59,7 @@
                     <tbody>
                     @foreach ($monthlyTaskStats as $row)
                         <tr>
-                            <td><a href="https://sportsmed.atlassian.net/browse/{!! $row->key !!}" target="_blank">{!! $row->key !!}</a></td>
+                            <td><a title="{!! $row->title !!}" href="https://sportsmed.atlassian.net/browse/{!! $row->key !!}" target="_blank">{!! $row->key !!}</a></td>
                             <td>{!! $row->full_name !!}</td>
                             <td>{!! $row->state !!}</td>
                             <td>{!! $row->updated_at->diffForHumans(null, false) !!}</td>
