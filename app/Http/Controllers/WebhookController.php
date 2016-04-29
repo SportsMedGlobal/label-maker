@@ -50,7 +50,7 @@ class WebhookController extends Controller
         $pullRequests = $this->github->getPullRequests($platform);
         $user = $this->checkUser($request['issue']['fields']['assignee']['name'], $request['issue']['fields']['assignee']['displayName']);
         $actionUser = $this->checkUser($request['user']['name'], $request['user']['displayName']);
-        $task = $this->checkTask($issueKey);
+        $task = $this->checkTask($issueKey, $request['issue']['fields']['summary']);
 
         foreach ($pullRequests as $pr) {
             if (strpos($pr['title'], $issueKey) !== false) {
@@ -243,11 +243,12 @@ class WebhookController extends Controller
         return 1;
     }
 
-    private function checkTask($issueKey)
+    private function checkTask($issueKey, $summary=null)
     {
         $task = Tasks::where('key', $issueKey)->first();
         if (!$task) {
             $task = new Tasks;
+            $task->title = $summary;
             $task->key = $issueKey;
             $task->save();
         }
