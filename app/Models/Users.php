@@ -93,4 +93,24 @@ class Users extends Model {
         return $dataArray;
     }
 
+    public function graphStats()
+    {
+        $dataArray = [];
+        $dateEnd = Carbon::now()->endOfMonth();
+        $dateStart = Carbon::now()->subYear()->startOfMonth();
+        $results = app('db')->select("
+            select 
+            date_format(actions.created_at, '%Y-%m') as month_string, 
+            SUM(case when actions.action = 'cr_failed' then 1 else 0 end) as crs_failed, 
+            SUM(case when actions.action = 'testing_failed' then 1 else 0 end) as testing_failed,
+            SUM(case when actions.action = 'testing_passed' then 1 else 0 end) as completed
+            from tasks inner join actions ON (actions.task_id = tasks.id) where tasks.assignee_id = ".$this->id." and tasks.updated_at BETWEEN '".$dateStart->toDateTimeString()."' AND '".$dateEnd->toDateTimeString()."' group by month_string
+        ");
+
+        foreach ($results as $row) {
+            $dataArray[] = $row;
+        }
+        return $dataArray;
+    }
+
 }
