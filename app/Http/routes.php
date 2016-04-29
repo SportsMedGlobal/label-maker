@@ -27,6 +27,14 @@ $app->get('/webhooks/sportsmed2/github/{action}', [
     'as' => 'webhook.github', 'uses' => 'WebhookController@processSportsMedGithubWebhook'
 ]);
 
+$app->get('/user/{userId}', [
+    'as' => 'user.profile', 'uses' => 'UserController@index'
+]);
+
+$app->post('/user/{userId}', [
+    'as' => 'user.profile', 'uses' => 'UserController@store'
+]);
+
 $app->get('/', [
     'as' => 'home', 'uses' => 'Controller@index'
 ]);

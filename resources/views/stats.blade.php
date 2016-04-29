@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>SM Developer Stats</title>
-    <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-</head>
+@extends('layout')
 
-<body>
+@section('content')
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
@@ -27,6 +20,7 @@
                             <th>Tickets Completed</th>
                             <th>CRs Finalized</th>
                             <th>Testing Finalized</th>
+                            <th>Avg to complete ticket</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,6 +33,7 @@
                             <td>{!! $row->completed !!}</td>
                             <td>{!! $row->crs_actioned !!}</td>
                             <td>{!! $row->testing_actioned !!}</td>
+                            <td>{!! round($row->avg_completed_time, 2) !!} hours</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -84,6 +79,4 @@
             </div>
         </div>
     </div>
-</body>
-
-</html>
+@endsection
