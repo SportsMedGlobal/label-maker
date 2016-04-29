@@ -12,8 +12,9 @@ class CreateUsersTable extends Migration {
 			$table->string('username', 255);
 			$table->string('full_name', 255);
 			$table->dateTime('last_action');
-			$table->string('slack_handle', 255);
-			$table->string('github_username', 255);
+			$table->string('slack_handle', 255)->nullable();
+			$table->string('github_username', 255)->nullable();
+            $table->string('role', 155)->nullable();
 			$table->timestamps();
 		});
 	}
