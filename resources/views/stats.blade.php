@@ -26,7 +26,7 @@
                     <tbody>
                     @foreach ($monthlyUserStats as $row)
                         <tr>
-                            <td>{!! $row->full_name !!}</td>
+                            <td><a href="/user/{!! $row->id !!}">{!! $row->full_name !!}</a></td>
                             <td>{!! $row->assigned !!}</td>
                             <td>{!! $row->failed_cr !!}</td>
                             <td>{!! $row->failed_testing !!}</td>
@@ -60,7 +60,7 @@
                     @foreach ($monthlyTaskStats as $row)
                         <tr>
                             <td><a title="{!! $row->title !!}" href="https://sportsmed.atlassian.net/browse/{!! $row->key !!}" target="_blank">{!! $row->key !!}</a></td>
-                            <td>{!! $row->full_name !!}</td>
+                            <td><a href="/user/{!! $row->user_id !!}">{!! $row->full_name !!}</a></td>
                             <td>{!! $row->state !!}</td>
                             <td>{!! $row->updated_at->diffForHumans(null, false) !!}</td>
                             <td>{!! $row->cr_failed !!}</td>

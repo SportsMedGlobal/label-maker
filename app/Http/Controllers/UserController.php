@@ -13,7 +13,10 @@ class UserController extends BaseController
     public function index(Request $request, $userId)
     {
         $user = Users::findOrFail($userId);
-        dd($user);
+
+        return view('profile')->with(['user' => $user, 'stats' => $user->userStats()]);
+        
+        
     }
 
     public function store(Request $request, $userId)
