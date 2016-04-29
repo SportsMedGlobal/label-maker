@@ -9,10 +9,12 @@ class CreateTasksTable extends Migration {
 	{
 		Schema::create('tasks', function(Blueprint $table) {
 			$table->increments('id');
-			$table->timestamps();
 			$table->string('key', 50);
+            $table->string('title', 255);
 			$table->integer('assignee_id');
 			$table->enum('state', array('development','needs_cr', 'needs_testing', 'in_testing', 'changes_needed', 'completed'));
+			$table->dateTime('completed_at')->nullable()->default(null);
+			$table->timestamps();
 		});
 	}
 

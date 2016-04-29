@@ -12,7 +12,7 @@ class CreateActionsTable extends Migration {
 			$table->timestamps();
 			$table->integer('user_id');
 			$table->integer('task_id');
-			$table->enum('action', array('created_task', 'cr_passed', 'cr_failed', 'finished_task', 'testing_passed', 'testing_failed'));
+			$table->enum('action', array('created_task', 'cr_passed', 'cr_failed', 'finished_task', 'testing_passed', 'testing_failed', 'performed_cr'));
 		});
 	}
 
