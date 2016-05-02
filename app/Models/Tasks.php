@@ -29,6 +29,8 @@ class Tasks extends Model {
                 tasks.completed_at,
                 tasks.created_at,
                 tasks.updated_at,
+                tasks.pr_link,
+                tasks.repo_name,
                 users.id as user_id,
                 users.full_name,
                 users.username,

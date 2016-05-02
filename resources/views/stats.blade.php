@@ -49,6 +49,7 @@
                     <tr>
                         <th>Task</th>
                         <th>Assigned To</th>
+                        <th>PR</th>
                         <th>Status</th>
                         <th>Last Update</th>
                         <th># Failed CR</th>
@@ -61,6 +62,7 @@
                         <tr>
                             <td><a title="{!! $row->title !!}" href="https://sportsmed.atlassian.net/browse/{!! $row->key !!}" target="_blank">{!! $row->key !!}</a></td>
                             <td><a href="/user/{!! $row->user_id !!}">{!! $row->full_name !!}</a></td>
+                            <td>@if (!empty($row->pr_link)) <a href="{!! $row->pr_link !!}" target="_blank">Github</a> @else - @endif </td>
                             <td>{!! $row->state !!}</td>
                             <td>{!! $row->updated_at->diffForHumans(null, false) !!}</td>
                             <td>{!! $row->cr_failed !!}</td>
