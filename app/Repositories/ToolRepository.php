@@ -8,9 +8,9 @@ use App\Models\Users;
 
 class ToolRepository implements ToolInterface
 {
-    public function logAction($action, $userId, $taskId)
+    public function logAction($action ='', $userId, $taskId)
     {
-        $action = new Actions;
+        $action = new Actions();
         $action->user_id = $userId;
         $action->task_id = $taskId;
         $action->action = $action;
