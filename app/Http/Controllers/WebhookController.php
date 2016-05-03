@@ -55,6 +55,7 @@ class WebhookController extends Controller
 
         \Log::info('Jira', ['jira' => $jiraInfo]);
         \Log::info('User', ['action' => $actionUser, 'assigned' => $assignedUser]);
+        exit;
         foreach ($pullRequests as $pr) {
             if (strpos($pr['title'], $issueKey) !== false) {
                 $task = $this->tools->checkTask($issueKey, $jiraInfo['issue']['fields']['summary'], $pr['html_url'], $platform);
