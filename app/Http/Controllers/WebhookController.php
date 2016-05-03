@@ -52,8 +52,9 @@ class WebhookController extends Controller
         $pullRequests = $this->github->getPullRequests($platform);
         $assignedUser = $this->tools->checkUser($jiraInfo['issue']['fields']['assignee']['name'], $jiraInfo['issue']['fields']['assignee']['displayName']);
         $actionUser = $this->tools->checkUser($jiraInfo['user']['name'], $jiraInfo['user']['displayName']);
-        
 
+        \Log::info('Jira', ['jira' => $jiraInfo]);
+        \Log::info('User', ['action' => $actionUser, 'assigned' => $assignedUser]);
         foreach ($pullRequests as $pr) {
             if (strpos($pr['title'], $issueKey) !== false) {
                 $task = $this->tools->checkTask($issueKey, $jiraInfo['issue']['fields']['summary'], $pr['html_url'], $platform);
@@ -138,7 +139,7 @@ class WebhookController extends Controller
                         $this->github->addLabel($platform, $pr['number'], 'Status: Needs Testing');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Revision Needed');
-                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed code review by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
+                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed code review by: '.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
                         break;
 
                     case 'code_review_failed':
@@ -150,7 +151,7 @@ class WebhookController extends Controller
                         $this->github->addLabel($platform, $pr['number'], 'Status: Revision Needed');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Work In Progress');
-                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed code review by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
+                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed code review by: '.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
                         break;
 
                     case 'testing_in_progress':
@@ -175,7 +176,7 @@ class WebhookController extends Controller
                         $this->github->removeLabel($platform, $pr['number'], 'Status: In Testing');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Revision Needed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Work In Progress');
-                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed testing by:'.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
+                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed testing by:'.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
                         break;
 
                     case 'testing_failed':
