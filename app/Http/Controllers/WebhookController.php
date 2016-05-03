@@ -7,6 +7,7 @@ use App\Models\Tasks;
 use App\Models\Users;
 use App\Repositories\GithubInterface;
 use App\Repositories\SlackInterface;
+use App\Repositories\ToolInterface;
 use Carbon\Carbon;
 use Github\Client;
 use Illuminate\Http\Request;
@@ -18,10 +19,11 @@ class WebhookController extends Controller
      *
      * @return void
      */
-    public function __construct(SlackInterface $slackInterface, GithubInterface $githubInterface)
+    public function __construct(SlackInterface $slackInterface, GithubInterface $githubInterface, ToolInterface $toolInterface)
     {
         $this->slack = $slackInterface;
         $this->github = $githubInterface;
+        $this->tools = $toolInterface;
     }
 
     public function processSportsMedJiraWebhook(Request $request, $issueKey, $action)
@@ -48,12 +50,13 @@ class WebhookController extends Controller
         $platform = 'platform';
         $jiraInfo = $request->all();
         $pullRequests = $this->github->getPullRequests($platform);
-        $user = $this->checkUser($request['issue']['fields']['assignee']['name'], $request['issue']['fields']['assignee']['displayName']);
-        $actionUser = $this->checkUser($request['user']['name'], $request['user']['displayName']);
-        $task = $this->checkTask($issueKey, $request['issue']['fields']['summary'], $pr['html_url'], $platform);
+        $user = $this->tools->checkUser($jiraInfo['issue']['fields']['assignee']['name'], $jiraInfo['issue']['fields']['assignee']['displayName']);
+        $actionUser = $this->tools->checkUser($jiraInfo['user']['name'], $jiraInfo['user']['displayName']);
+        
 
         foreach ($pullRequests as $pr) {
             if (strpos($pr['title'], $issueKey) !== false) {
+                $task = $this->tools->checkTask($issueKey, $jiraInfo['issue']['fields']['summary'], $pr['html_url'], $platform);
                 switch ($action) {
                     case 'create_task':
                         if ($request['issue']['fields']['priority']['name'] == 'Critical') {
@@ -64,11 +67,7 @@ class WebhookController extends Controller
                         $task->state = 'development';
                         $task->save();
 
-                        $action = new Actions;
-                        $action->user_id = $user->id;
-                        $action->task_id = $task->id;
-                        $action->action = 'created_task';
-                        $action->save();
+                        $this->tools->logAction('created_task', $user->id, $task->id);
 
                     break;
                     case 'code_review_needed':
@@ -110,11 +109,7 @@ class WebhookController extends Controller
                         $task->state = 'needs_testing';
                         $task->save();
 
-                        $action = new Actions;
-                        $action->user_id = $actionUser->id;
-                        $action->task_id = $task->id;
-                        $action->action = 'cr_passed';
-                        $action->save();
+                        $this->tools->logAction('cr_passed', $user->id, $task->id);
 
                         $message = [
                             'fallback' => 'A new ticket is ready for testing. <https://sportsmed.atlassian.net/browse/'.$issueKey.'>',
@@ -150,11 +145,7 @@ class WebhookController extends Controller
                         $task->state = 'development';
                         $task->save();
 
-                        $action = new Actions;
-                        $action->user_id = $actionUser->id;
-                        $action->task_id = $task->id;
-                        $action->action = 'cr_failed';
-                        $action->save();
+                        $this->tools->logAction('cr_failed', $user->id, $task->id);
                         
                         $this->github->addLabel($platform, $pr['number'], 'Status: Revision Needed');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Code Review Needed');
@@ -166,11 +157,7 @@ class WebhookController extends Controller
                         $task->state = 'in_testing';
                         $task->save();
 
-                        $action = new Actions;
-                        $action->user_id = $actionUser->id;
-                        $action->task_id = $task->id;
-                        $action->action = 'started_testing';
-                        $action->save();
+                        $this->tools->logAction('started_testing', $user->id, $task->id);
                         
                         $this->github->addLabel($platform, $pr['number'], 'Status: In Testing');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Needs Testing');
@@ -180,11 +167,7 @@ class WebhookController extends Controller
                         $task->state = 'completed';
                         $task->save();
 
-                        $action = new Actions;
-                        $action->user_id = $actionUser->id;
-                        $action->task_id = $task->id;
-                        $action->action = 'testing_passed';
-                        $action->save();
+                        $this->tools->logAction('testing_passed', $user->id, $task->id);
                         
                         $this->github->addLabel($platform, $pr['number'], 'Status: Completed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Needs Testing');
@@ -198,11 +181,7 @@ class WebhookController extends Controller
                         $task->state = 'development';
                         $task->save();
 
-                        $action = new Actions;
-                        $action->user_id = $actionUser->id;
-                        $action->task_id = $task->id;
-                        $action->action = 'testing_failed';
-                        $action->save();
+                        $this->tools->logAction('testing_failed', $user->id, $task->id);
                         
                         $message = [
                             'text' => 'The following pull request has failed testing <'.$pr['html_url'].'>',
