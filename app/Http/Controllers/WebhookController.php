@@ -147,8 +147,9 @@ class WebhookController extends Controller
                         $this->tools->logAction('cr_failed', $actionUser->id, $task->id);
                         
                         $this->github->addLabel($platform, $pr['number'], 'Status: Revision Needed');
-                        $this->github->addLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Work In Progress');
+                        $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
+                        $this->github->removeLabel($platform, $pr['number'], 'Status: Needs Testing');
                         $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed code review by: '.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
                         break;
 
