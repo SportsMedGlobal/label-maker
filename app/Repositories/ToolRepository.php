@@ -8,12 +8,12 @@ use App\Models\Users;
 
 class ToolRepository implements ToolInterface
 {
-    public function logAction($action ='', $userId, $taskId)
+    public function logAction($actionText ='', $userId, $taskId)
     {
         $action = new Actions();
         $action->user_id = $userId;
         $action->task_id = $taskId;
-        $action->action = $action;
+        $action->action = $actionText;
         $action->save();
         return $action;
     }
