@@ -165,6 +165,7 @@ class WebhookController extends Controller
 
                     case 'testing_completed':
                         $task->state = 'completed';
+                        $task->completed_at = Carbon::now()->toDateTimeString();
                         $task->save();
 
                         $this->tools->logAction('testing_passed', $actionUser->id, $task->id);
