@@ -15,6 +15,7 @@ class ToolRepository implements ToolInterface
         $action->task_id = $taskId;
         $action->action = $action;
         $action->save();
+        return $action;
     }
 
     public function checkTask($issueKey, $summary=null, $prlink = '', $repo='platform')
