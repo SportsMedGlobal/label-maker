@@ -38,6 +38,9 @@ class ToolRepository implements ToolInterface
 
     public function checkUser($username, $fullName)
     {
+        if (empty($username)) {
+            return  Users::where('id', 12)->first();
+        }
         $user = Users::where('username', $username)->first();
         if (!$user) {
             $user = new Users;

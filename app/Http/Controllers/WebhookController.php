@@ -221,40 +221,4 @@ class WebhookController extends Controller
         }
         return 1;
     }
-
-    private function checkTask($issueKey, $summary=null, $prlink = '', $repo='platform')
-    {
-        $task = Tasks::where('key', $issueKey)->first();
-        if (!$task) {
-            $task = new Tasks;
-            $task->title = $summary;
-            $task->key = $issueKey;
-            $task->repo_name = $repo;
-            $task->pr_link = $prlink;
-            $task->save();
-        } else {
-            $task->repo_name = $repo;
-            $task->pr_link = $prlink;
-            $task->save();
-        }
-        return $task;
-    }
-
-    private function checkUser($username, $fullName)
-    {
-        if (empty($username)) {
-            return  Users::where('id', 12)->first();
-        }
-        $user = Users::where('username', $username)->first();
-        if (!$user) {
-            $user = new Users;
-            $user->full_name = $fullName;
-            $user->username = $username;
-            $user->save();
-        }
-        return $user;
-    }
-
-
-
 }
