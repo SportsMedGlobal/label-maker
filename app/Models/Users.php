@@ -36,11 +36,11 @@ class Users extends Model {
                 (SELECT count(*) from actions WHERE actions.user_id = users.id AND actions.action IN ('testing_passed', 'testing_failed') and actions.created_at BETWEEN '".$dateStart."' AND '".$dateEnd."') as testing_actioned,
                 (SELECT count(*) FROM tasks INNER JOIN actions ON (actions.task_id = tasks.id) WHERE tasks.assignee_id = users.id AND actions.action = 'cr_failed' and actions.created_at BETWEEN '".$dateStart."' AND '".$dateEnd."') as failed_cr,
                 (SELECT count(*) FROM tasks INNER JOIN actions ON (actions.task_id = tasks.id) WHERE tasks.assignee_id = users.id AND actions.action = 'testing_failed' and actions.created_at BETWEEN '".$dateStart."' AND '".$dateEnd."') as failed_testing,
-                (SELECT MAX(actions.created_at) FROM actions WHERE actions.user_id = users.id) as last_action
+                (SELECT MAX(actions.created_at) FROM actions WHERE actions.user_id = users.id) as last_action_table
             FROM 
                 users
-            HAVING
-                last_action BETWEEN '".$dateStart."' AND '".$dateEnd."' 
+            WHERE
+                users.last_action BETWEEN '".$dateStart."' AND '".$dateEnd."' 
             ORDER BY 
                 users.last_action DESC
         ");
