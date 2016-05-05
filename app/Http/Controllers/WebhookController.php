@@ -175,6 +175,7 @@ class WebhookController extends Controller
                         $this->github->removeLabel($platform, $pr['number'], 'Status: In Testing');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Revision Needed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Work In Progress');
+                        $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed testing by:'.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
                         break;
 
