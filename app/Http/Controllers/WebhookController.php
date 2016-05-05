@@ -210,9 +210,9 @@ class WebhookController extends Controller
                         
                         $this->slack->sendSlackChannelMessage($message, '#developers');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Revision Needed');
-                        $this->github->addLabel($platform, $pr['number'], 'Status: Code Review Needed');
+                        $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Work In Progress');
-                        $this->github->addLabel($platform, $pr['number'], 'Status: Needs Testing');
+                        $this->github->removeLabel($platform, $pr['number'], 'Status: Needs Testing');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: In Testing');
                         $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed testing by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
                         break;
