@@ -52,6 +52,7 @@
                         <th>PR</th>
                         <th>Status</th>
                         <th>Last Update</th>
+                        <th>Last Update Raw</th>
                         <th># Failed CR</th>
                         <th># Failed Testing</th>
                         <th>Time on Ticket</th>
@@ -65,6 +66,7 @@
                             <td>@if (!empty($row->pr_link)) <a href="{!! $row->pr_link !!}" target="_blank">Github</a> @else - @endif </td>
                             <td>{!! $row->state !!}</td>
                             <td>{!! $row->updated_at->diffForHumans(null, false) !!}</td>
+                            <td>{!! $row->updated_at->toDateTimeString() !!}</td>
                             <td>{!! $row->cr_failed !!}</td>
                             <td>{!! $row->testing_failed !!}</td>
                             <td>
@@ -83,8 +85,22 @@
     </div>
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#userstats').DataTable();
-            $('#ticket_stats').DataTable();
+            $('#userstats').DataTable({
+                "search":   false
+            });
+            $('#ticket_stats').DataTable({
+                "search":   false,
+                "columnDefs": [
+                    {
+                        "targets": [ 5 ],
+                        "visible": false
+                    },
+                    {
+                        "orderData":[ 5 ],   "targets": [ 4 ]
+                    }
+                ]
+
+            });
         } );
     </script>
 @endsection
