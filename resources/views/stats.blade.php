@@ -94,7 +94,8 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('#userstats').DataTable({
-                "searching":   false
+                "searching":   false,
+                "order": [[ 4, "desc" ]]
             });
             $('#ticket_stats').DataTable({
                 "searching":   false,
