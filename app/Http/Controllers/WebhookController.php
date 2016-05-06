@@ -62,7 +62,9 @@ class WebhookController extends Controller
                             // TODO Send Critical notice
                         }
 
-                        $task->assignee_id = $assignedUser->id;
+                        if (empty($task->assignee_id)) {
+                            $task->assignee_id = $assignedUser->id;
+                        }
                         $task->state = 'development';
                         $task->save();
 
@@ -70,7 +72,9 @@ class WebhookController extends Controller
 
                     break;
                     case 'code_review_needed':
-                        $task->assignee_id = $assignedUser->id;
+                        if (empty($task->assignee_id)) {
+                            $task->assignee_id = $assignedUser->id;
+                        }
                         $task->state = 'needs_cr';
                         $task->save();
 
