@@ -9,6 +9,9 @@
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.0.2/Chart.bundle.min.js" charset="utf-8"></script>
+        <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js"></script>
+
         <style type="text/css">
             canvas{
                 width: 100% !important;

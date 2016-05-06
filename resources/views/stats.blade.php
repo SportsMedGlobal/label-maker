@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="col-md-12 text-center"><h3>Team Stats</h3></div>
-                <table class="table table-striped">
+                <table class="table table-striped" id="userstats">
                     <thead>
                         <tr>
                             <th>Developer</th>
@@ -44,7 +44,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="col-md-12 text-center"><h3>Ticket Stats</h3></div>
-                <table class="table table-striped">
+                <table class="table table-striped" id="ticket_stats">
                     <thead>
                     <tr>
                         <th>Task</th>
@@ -81,4 +81,10 @@
             </div>
         </div>
     </div>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#userstats').DataTable();
+            $('#ticket_stats').DataTable();
+        } );
+    </script>
 @endsection
