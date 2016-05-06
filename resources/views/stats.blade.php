@@ -98,6 +98,7 @@
             });
             $('#ticket_stats').DataTable({
                 "searching":   false,
+                "order": [[ 5, "desc" ]],
                 "columnDefs": [
                     {
                         "targets": [ 5 ],
