@@ -56,6 +56,7 @@
                         <th># Failed CR</th>
                         <th># Failed Testing</th>
                         <th>Time on Ticket</th>
+                        <th>Time Taken Raw</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -76,6 +77,13 @@
                                     {!! $row->created_at->diffForHumans($row->completed_at, true) !!}
                                 @endif
                             </td>
+                            <td>
+                                @if (empty($row->completed_at))
+                                    {!! $row->created_at->diffInSeconds(\Carbon\Carbon::now(), true) !!}
+                                @else
+                                    {!! $row->created_at->diffInSeconds($row->completed_at, true) !!}
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -86,17 +94,24 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('#userstats').DataTable({
-                "search":   false
+                "searching":   false
             });
             $('#ticket_stats').DataTable({
-                "search":   false,
+                "searching":   false,
                 "columnDefs": [
                     {
                         "targets": [ 5 ],
                         "visible": false
                     },
                     {
+                        "targets": [ 9 ],
+                        "visible": false
+                    },
+                    {
                         "orderData":[ 5 ],   "targets": [ 4 ]
+                    },
+                    {
+                        "orderData":[ 9 ],   "targets": [ 8 ]
                     }
                 ]
 
