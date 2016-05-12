@@ -18,8 +18,8 @@
                             <th>Tickets Failed CR</th>
                             <th>Tickets Failed Testing</th>
                             <th>Tickets Completed</th>
-                            <th>CRs Finalized</th>
-                            <th>Testing Finalized</th>
+                            <th>CRs Done</th>
+                            <th>Testing Done</th>
                             <th>Avg to complete ticket</th>
                         </tr>
                     </thead>
