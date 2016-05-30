@@ -8,5 +8,5 @@ namespace App\Repositories;
  */
 interface SlackInterface
 {
-    public function sendSlackChannelMessage($message, $channel);
+    public function sendSlackMessage($message, $channel);
 }

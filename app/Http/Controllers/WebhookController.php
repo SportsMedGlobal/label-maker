@@ -81,7 +81,7 @@ class WebhookController extends Controller
                         $message = [
                             'text' => 'A new pull request is awaiting a code review. <'.$pr['html_url'].'>',
                             'fallback' => 'A new pull request is awaiting a code review. <'.$pr['html_url'].'>',
-                            'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
+                            'username' => "CodeMonkey", "icon_emoji" => ":monkey_face:",
                             "fields" => [
                                 [
                                     'title' => 'Jira Task',
@@ -101,7 +101,7 @@ class WebhookController extends Controller
                                 ],
                             ]
                         ];
-                        $this->slack->sendSlackChannelMessage($message, '#developers');
+                        $this->slack->sendSlackMessage($message, '#developers');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Needs Testing');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Revision Needed');
@@ -117,7 +117,7 @@ class WebhookController extends Controller
                         $message = [
                             'fallback' => 'A new ticket is ready for testing. <https://sportsmed.atlassian.net/browse/'.$issueKey.'>',
                             'text' => 'A new ticket is ready for testing. <https://sportsmed.atlassian.net/browse/'.$issueKey.'>',
-                            'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
+                            'username' => "CodeMonkey", "icon_emoji" => ":monkey_face:",
                             "fields" => [
                                 [
                                     'title' => 'Jira Task',
@@ -137,11 +137,11 @@ class WebhookController extends Controller
                                 ]
                             ]
                         ];
-                        $this->slack->sendSlackChannelMessage($message, '#testing');
+                        $this->slack->sendSlackMessage($message, '#testing');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Needs Testing');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Revision Needed');
-                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed code review by: '.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
+                        $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed code review by: '.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
                         break;
 
                     case 'code_review_failed':
@@ -149,12 +149,41 @@ class WebhookController extends Controller
                         $task->save();
 
                         $this->tools->logAction('cr_failed', $actionUser->id, $task->id);
-                        
+
+                        try {
+                            $taskUser = Users::findOrFail($task->assignee_id);
+                            if (!empty($taskUser->slack_handle)) {
+                                $message = [
+                                    'text' => 'Your pull request has failed Code Review <'.$task->pr_link.'>',
+                                    'fallback' => 'Your pull request has failed Code Review <'.$task->pr_link.'>',
+                                    'username' => "CodeMonkey", "icon_emoji" => ":monkey_face:",
+                                    "fields" => [
+                                        [
+                                            'title' => 'Jira Task',
+                                            'value' => '<https://sportsmed.atlassian.net/browse/'.$issueKey.'|'.$issueKey.'>'
+                                        ],
+                                        [
+                                            'title' => 'Task Title',
+                                            'value' => $task->title
+                                        ],
+                                        [
+                                            'title' => 'Pull Request',
+                                            'value' => '<' . $task->pr_link.'>'
+                                        ],
+                                    ]
+                                ];
+
+                                $this->slack->sendSlackMessage($message, '@'.$taskUser->slack_handle);
+                            }
+                        } catch (\Exception $e) {
+                            // Do nothing
+                        }
+
                         $this->github->addLabel($platform, $pr['number'], 'Status: Revision Needed');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Work In Progress');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Needs Testing');
-                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed code review by: '.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
+                        $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed code review by: '.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
                         break;
 
                     case 'testing_in_progress':
@@ -180,7 +209,7 @@ class WebhookController extends Controller
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Revision Needed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Work In Progress');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
-                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed testing by:'.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
+                        $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed testing by:'.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
                         break;
 
                     case 'testing_failed':
@@ -188,11 +217,40 @@ class WebhookController extends Controller
                         $task->save();
 
                         $this->tools->logAction('testing_failed', $actionUser->id, $task->id);
+
+                        try {
+                            $taskUser = Users::findOrFail($task->assignee_id);
+                            if (!empty($taskUser->slack_handle)) {
+                                $message = [
+                                    'text' => 'Your pull request has failed testing <'.$task->pr_link.'>',
+                                    'fallback' => 'Your pull request has failed testing <'.$task->pr_link.'>',
+                                    'username' => "CodeMonkey", "icon_emoji" => ":monkey_face:",
+                                    "fields" => [
+                                        [
+                                            'title' => 'Jira Task',
+                                            'value' => '<https://sportsmed.atlassian.net/browse/'.$issueKey.'|'.$issueKey.'>'
+                                        ],
+                                        [
+                                            'title' => 'Task Title',
+                                            'value' => $pr['title']
+                                        ],
+                                        [
+                                            'title' => 'Pull Request',
+                                            'value' => '<' . $task->pr_link.'>'
+                                        ],
+                                    ]
+                                ];
+
+                                $this->slack->sendSlackMessage($message, '@'.$taskUser->slack_handle);
+                            }
+                        } catch (\Exception $e) {
+                            // Do nothing
+                        }
                         
                         $message = [
                             'text' => 'The following pull request has failed testing <'.$pr['html_url'].'>',
                             'fallback' => 'The following pull request has failed testing <'.$pr['html_url'].'>',
-                            'username' => "Code-Monkey", "icon_emoji" => ":monkey_face:",
+                            'username' => "CodeMonkey", "icon_emoji" => ":monkey_face:",
                             "fields" => [
                                 [
                                     'title' => 'Jira Task',
@@ -213,13 +271,13 @@ class WebhookController extends Controller
                             ]
                         ];
                         
-                        $this->slack->sendSlackChannelMessage($message, '#developers');
+                        $this->slack->sendSlackMessage($message, '#developers');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Revision Needed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->addLabel($platform, $pr['number'], 'Status: Work In Progress');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Needs Testing');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: In Testing');
-                        $this->github->addComment($platform, $pr['number'], '_Code-Monkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed testing by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
+                        $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket failed testing by: '.$jiraInfo['user']['name'].' on: '. date('Y-m-d H:i') . '');
                         break;
                 }
                 break;

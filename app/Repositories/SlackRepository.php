@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 class SlackRepository implements SlackInterface
 {
-    public function sendSlackChannelMessage($message, $channel)
+    public function sendSlackMessage($message, $channel)
     {
         $slackData = $message;
         $slackData['channel'] = $channel;
