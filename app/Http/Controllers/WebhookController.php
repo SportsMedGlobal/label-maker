@@ -145,8 +145,10 @@ class WebhookController extends Controller
 
                         try {
                             $this->github->mergeBranch($platform, 'testing', $pr['head']['ref']);
+                            $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ Ticket merged to testing branch - '. date('Y-m-d H:i') . '');
                         } catch (\Exception $e) {
                             // Could not be merged
+                            $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ Ticket could not be merged to testing branch ('.$e->getMessage().') - '. date('Y-m-d H:i') . '');
                             $message = [
                                 'fallback' => 'Could not automatically merge branch ('.$pr['head']['ref'].') into "testing" branch, please merge manually. Reason: ' . $e->getMessage(),
                                 'text' => 'Could not automatically merge branch ('.$pr['head']['ref'].') into "testing" branch, please merge manually. Reason: ' . $e->getMessage(),
