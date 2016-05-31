@@ -41,6 +41,6 @@ class GithubRepository implements GithubInterface
     {
         $client = new Client();
         $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
-        return $client->api('repo')->merge('SportsMedGlobal', $repo, $base, $feature);
+        return $client->api('repo')->merge('SportsMedGlobal', $repo, $base, $feature, 'Merged ' . $feature . ' into '. $base);
     }
 }
