@@ -142,8 +142,65 @@ class WebhookController extends Controller
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Revision Needed');
                         $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed code review by: '.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
-                        $response = $this->github->mergeBranch($platform, 'testing', $pr['head']['ref']);
-                        \Log::info('Merge Result', ['response' => $response]);
+
+                        try {
+                            $this->github->mergeBranch($platform, 'testing', $pr['head']['ref']);
+                        } catch (\Exception $e) {
+                            // Could not be merged
+                            $message = [
+                                'fallback' => 'Could not automatically merge branch ('.$pr['head']['ref'].') into "testing" branch, please merge manually. Reason: ' . $e->getMessage(),
+                                'text' => 'Could not automatically merge branch ('.$pr['head']['ref'].') into "testing" branch, please merge manually. Reason: ' . $e->getMessage(),
+                                'username' => "CodeMonkey", "icon_emoji" => ":speak_no_evil:",
+                                "fields" => [
+                                    [
+                                        'title' => 'Jira Task',
+                                        'value' => '<https://sportsmed.atlassian.net/browse/'.$issueKey.'|'.$issueKey.'>'
+                                    ],
+                                    [
+                                        'title' => 'Author',
+                                        'value' => $pr['user']['login']
+                                    ],
+                                    [
+                                        'title' => 'Task Title',
+                                        'value' => $pr['title']
+                                    ],
+                                    [
+                                        'title' => 'Pull Request',
+                                        'value' => '<'.$pr['html_url'].'|'.$pr['number'].'>'
+                                    ]
+                                ]
+                            ];
+                            $this->slack->sendSlackMessage($message, '#developers');
+
+                            try {
+                                $taskUser = Users::findOrFail($task->assignee_id);
+                                if (!empty($taskUser->slack_handle)) {
+                                    $message = [
+                                        'text' => 'Could not automatically merge branch ('.$pr['head']['ref'].') into "testing" branch, please merge manually. Reason: ' . $e->getMessage(),
+                                        'fallback' => 'Could not automatically merge branch ('.$pr['head']['ref'].') into "testing" branch, please merge manually. Reason: ' . $e->getMessage(),
+                                        'username' => "CodeMonkey", "icon_emoji" => ":speak_no_evil:",
+                                        "fields" => [
+                                            [
+                                                'title' => 'Jira Task',
+                                                'value' => '<https://sportsmed.atlassian.net/browse/'.$issueKey.'|'.$issueKey.'>'
+                                            ],
+                                            [
+                                                'title' => 'Task Title',
+                                                'value' => $task->title
+                                            ],
+                                            [
+                                                'title' => 'Pull Request',
+                                                'value' => '<' . $task->pr_link.'>'
+                                            ],
+                                        ]
+                                    ];
+
+                                    $this->slack->sendSlackMessage($message, '@'.$taskUser->slack_handle);
+                                }
+                            } catch (\Exception $e) {
+                                // Do nothing
+                            }
+                        }
                         break;
 
                     case 'code_review_failed':
@@ -158,7 +215,7 @@ class WebhookController extends Controller
                                 $message = [
                                     'text' => 'Your pull request has failed Code Review <'.$task->pr_link.'>',
                                     'fallback' => 'Your pull request has failed Code Review <'.$task->pr_link.'>',
-                                    'username' => "CodeMonkey", "icon_emoji" => ":monkey_face:",
+                                    'username' => "CodeMonkey", "icon_emoji" => ":speak_no_evil:",
                                     "fields" => [
                                         [
                                             'title' => 'Jira Task',
@@ -213,8 +270,6 @@ class WebhookController extends Controller
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed testing by:'.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
 
-                        $response = $this->github->mergeBranch($platform, 'testing', $pr['head']['ref']);
-                        \Log::info('Merge Result', ['response' => $response]);
                         break;
 
                     case 'testing_failed':
@@ -229,7 +284,7 @@ class WebhookController extends Controller
                                 $message = [
                                     'text' => 'Your pull request has failed testing <'.$task->pr_link.'>',
                                     'fallback' => 'Your pull request has failed testing <'.$task->pr_link.'>',
-                                    'username' => "CodeMonkey", "icon_emoji" => ":monkey_face:",
+                                    'username' => "CodeMonkey", "icon_emoji" => ":speak_no_evil:",
                                     "fields" => [
                                         [
                                             'title' => 'Jira Task',
@@ -255,7 +310,7 @@ class WebhookController extends Controller
                         $message = [
                             'text' => 'The following pull request has failed testing <'.$pr['html_url'].'>',
                             'fallback' => 'The following pull request has failed testing <'.$pr['html_url'].'>',
-                            'username' => "CodeMonkey", "icon_emoji" => ":monkey_face:",
+                            'username' => "CodeMonkey", "icon_emoji" => ":speak_no_evil:",
                             "fields" => [
                                 [
                                     'title' => 'Jira Task',
