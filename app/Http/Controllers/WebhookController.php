@@ -142,6 +142,8 @@ class WebhookController extends Controller
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Revision Needed');
                         $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed code review by: '.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
+                        $response = $this->github->mergeBranch($platform, 'testing', $pr['head']['ref']);
+                        \Log::info('Merge Result', ['response' => $response]);
                         break;
 
                     case 'code_review_failed':
@@ -210,6 +212,9 @@ class WebhookController extends Controller
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Work In Progress');
                         $this->github->removeLabel($platform, $pr['number'], 'Status: Code Review Needed');
                         $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ @'.$pr['user']['login']. ' ticket passed testing by:'.$actionUser->username.' on: '. date('Y-m-d H:i') . '');
+
+                        $response = $this->github->mergeBranch($platform, 'testing', $pr['head']['ref']);
+                        \Log::info('Merge Result', ['response' => $response]);
                         break;
 
                     case 'testing_failed':

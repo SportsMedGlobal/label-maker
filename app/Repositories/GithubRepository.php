@@ -32,8 +32,15 @@ class GithubRepository implements GithubInterface
         $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
         $openPullRequests = $client->api('pull_request'); //->all('SportsMedGlobal', $platform);
         $paginator  = new \Github\ResultPager($client);
-        $parameters = array('SportsMedGlobal', $repo);
+        $parameters = ['SportsMedGlobal', $repo];
         $pullRequests     = $paginator->fetchAll($openPullRequests, 'all', $parameters);
         return $pullRequests;
+    }
+    
+    public function mergeBranch($repo, $base, $feature)
+    {
+        $client = new Client();
+        $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
+        return $client->api('repo')->merge('SportsMedGlobal', $repo, $base, $feature);
     }
 }
