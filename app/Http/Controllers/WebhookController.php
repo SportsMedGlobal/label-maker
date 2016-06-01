@@ -6,6 +6,7 @@ use App\Models\Actions;
 use App\Models\Tasks;
 use App\Models\Users;
 use App\Repositories\GithubInterface;
+use App\Repositories\JiraInterface;
 use App\Repositories\SlackInterface;
 use App\Repositories\ToolInterface;
 use Carbon\Carbon;
@@ -19,11 +20,12 @@ class WebhookController extends Controller
      *
      * @return void
      */
-    public function __construct(SlackInterface $slackInterface, GithubInterface $githubInterface, ToolInterface $toolInterface)
+    public function __construct(SlackInterface $slackInterface, GithubInterface $githubInterface, ToolInterface $toolInterface, JiraInterface $jiraInterface)
     {
         $this->slack = $slackInterface;
         $this->github = $githubInterface;
         $this->tools = $toolInterface;
+        $this->jira = $jiraInterface;
     }
 
     public function processSportsMedJiraWebhook(Request $request, $issueKey, $action)
@@ -145,9 +147,11 @@ class WebhookController extends Controller
 
                         try {
                             $this->github->mergeBranch($platform, 'testing', $pr['head']['ref']);
+                            $this->jira->comment($issueKey, 'Work has been automatically merged to the testing branch');
                             $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ Ticket merged to testing branch - '. date('Y-m-d H:i') . '');
                         } catch (\Exception $e) {
                             // Could not be merged
+                            $this->jira->comment($issueKey, 'Work could not be automatically merged to the testing branch.  Please ask the developer to merge manually');
                             $this->github->addComment($platform, $pr['number'], '_CodeMonkey (Bot) Says:_ Ticket could not be merged to testing branch ('.$e->getMessage().') - '. date('Y-m-d H:i') . '');
                             $message = [
                                 'fallback' => 'Could not automatically merge branch ('.$pr['head']['ref'].') into "testing" branch, please merge manually. Reason: ' . $e->getMessage(),

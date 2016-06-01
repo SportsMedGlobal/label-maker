@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\GithubInterface;
 use App\Repositories\GithubRepository;
+use App\Repositories\JiraInterface;
+use App\Repositories\JiraRepository;
 use App\Repositories\SlackInterface;
 use App\Repositories\SlackRepository;
 use App\Repositories\ToolInterface;
@@ -22,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(SlackInterface::class, SlackRepository::class);
         $this->app->bind(GithubInterface::class, GithubRepository::class);
         $this->app->bind(ToolInterface::class, ToolRepository::class);
+        $this->app->bind(JiraInterface::class, JiraRepository::class);
     }
 }
