@@ -23,7 +23,7 @@ class Users extends Model {
         // TODO replace parameters with PDO parameters. There is some weird behaviour with params in Lumen
         $results = app('db')->select("
             SELECT 
-                users.id, 
+                DISTINCT users.id, 
                 users.username, 
                 users.full_name,
                 (SELECT count(*) FROM tasks WHERE tasks.assignee_id = users.id and tasks.created_at BETWEEN '".$dateStart."' AND '".$dateEnd."') as assigned, 
@@ -39,8 +39,9 @@ class Users extends Model {
                 (SELECT MAX(actions.created_at) FROM actions WHERE actions.user_id = users.id) as last_action_table
             FROM 
                 users
+            INNER JOIN actions ON (actions.user_id = users.id)    
             WHERE
-                users.last_action BETWEEN '".$dateStart."' AND '".$dateEnd."' 
+                actions.created_at BETWEEN '".$dateStart."' AND '".$dateEnd."' 
             ORDER BY 
                 users.last_action DESC
         ");
