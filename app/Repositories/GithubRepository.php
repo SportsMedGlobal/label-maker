@@ -14,9 +14,13 @@ class GithubRepository implements GithubInterface
 
     public function removeLabel($repo, $prNumber, $label)
     {
-        $client = new Client();
-        $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
-        $client->api('issue')->labels()->remove('SportsMedGlobal', $repo, $prNumber, $label);
+        try {
+            $client = new Client();
+            $client->authenticate(env('GITHUB_TOKEN'), '', Client::AUTH_HTTP_TOKEN);
+            $client->api('issue')->labels()->remove('SportsMedGlobal', $repo, $prNumber, $label);
+        } catch (\Exception $e) {
+            // do nothing
+        }
     }
 
     public function addComment($repo, $prNumber, $comment)
